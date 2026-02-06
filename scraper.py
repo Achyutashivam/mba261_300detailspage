@@ -55,7 +55,7 @@ BASE_URL = [
     "https://www.shiksha.com/college/st-joseph-s-institute-of-management-m-g-road-bangalore-32486",
     "https://www.shiksha.com/college/nmims-indore-52244",
     "https://www.shiksha.com/university/sister-nivedita-university-kolkata-56285",
-    "https://www.shiksha.com/university/dayalbagh-educational-institute-agra-53469",
+
    
 ]
 
@@ -194,11 +194,21 @@ def scrape_college_info(driver,URLS):
     data["college_info"]["college_name"] = driver.find_element(By.TAG_NAME, "h1").text.strip()
 
     # ================= LOCATION + CITY =================
-    loc = driver.find_element(By.CSS_SELECTOR, "span.f90eb6").text
-    if "," in loc:
-        l, c = loc.split(",", 1)
-        data["college_info"]["location"] = l.strip()
-        data["college_info"]["city"] = c.strip()
+    wait = WebDriverWait(driver, 15)
+
+    try:
+        loc = wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "span.f90eb6"))
+        ).text
+
+        if "," in loc:
+            l, c = loc.split(",", 1)
+            data["college_info"]["location"] = l.strip()
+        else:
+            data["college_info"]["location"] = loc.strip()
+
+    except TimeoutException:
+        data["college_info"]["location"] = None
 
     # ================= RATING =================
     try:
